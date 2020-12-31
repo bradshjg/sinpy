@@ -1,0 +1,91 @@
+:toc:
+ifdef::env-github[]
+:tip-caption: :bulb:
+:note-caption: :information_source:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
+= SinPy
+
+A toy web framework demonstrating a boilerplate-free http://sinatrarb.com/[Sinatra]-esque API.
+
+== Motivation
+
+Sinatra works by extending the ``main`` object with ``get``, ``post``, etc. methods and then starting
+the server using the https://ruby-doc.org/core-3.0.0/Kernel.html#method-i-at_exit[``at_exit``] method.
+This allows for writing an application like
+
+.example.rb
+[source, ruby]
+----
+require 'sinatra'
+get '/howdy' do
+      'Howdy!'
+    end
+----
+
+and starting a server that will respond to ``GET`` requests to http://localhost:4567/howdy with ``Howdy!`` using
+
+``ruby example.rb``
+
+I find this equally blasphemous and beautiful, so now there's a "simplified" Python port.
+
+== API
+
+While Sinatra extends the ``main`` object with methods that correspond to HTTP verbs, SinPy inspects the
+(Python-equivalent) ``main`` object and sets up routing for every function defined therein (that doesn't
+start with an underscore) based on the function name, e.g.
+
+[source, python]
+----
+def myhandler():
+    return "This text will be the response requests to /myhandler"
+----
+
+== Demo
+
+``python3 example.py``
+
+corresponds to
+
+.example.py
+[source, python]
+----
+import sinpy
+
+
+def hello():
+    return "Hello!"
+
+
+def howdy():
+    return _i_am_a_howdy_helper()
+
+
+def _i_am_a_howdy_helper():
+    return "Howdy!"
+
+----
+
+Once running, we can see
+
+----
+➜ python example.py
+Serving on port 8000...
+----
+
+If we open another shell and issue a few commands
+
+----
+➜ curl localhost:8000/hello
+Hello!
+➜ curl localhost:8000/howdy
+Howdy!
+➜ curl localhost:8000/_i_am_a_howdy_helper
+Not Found
+----
+
+we can see that the server has set up routing for the ``hello`` and ``howdy`` functions,
+and ignored the "private" ``_i_am_a_howdy_helper`` function.
